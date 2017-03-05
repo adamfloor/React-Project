@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>ReactFlicker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="content"></div>
+<div class="row" >
+        <div id="results" ></div>
+</div>
+
+
+<script type="text/jsx">
+
+    var MyFirstCompe = React.createClass({
+
+
+        PresentPictures: function(target){
+            if(target.charCode==13) {
+                $("#results").empty();
+                apiurl = "https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=0e98c23b430d512c4adb6b1b024bdb5f&tags="+this.state.message+"&format=json&nojsoncallback=1";
+                $.getJSON(apiurl,function(json){ // Retrieve all the picture with a specific term
+                    $.each(json.photos.photo,function(i,myresult){
+                        apiurl_size = "https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=ca370d51a054836007519a00ff4ce59e&photo_id="+myresult.id+"&format=json&nojsoncallback=1";
+                        $.getJSON(apiurl_size,function(size){ // Retrieve all photo with width == 640 and height between 400 and 450 .
+                            $.each(size.sizes.size,function(i,myresult_size){
+                                if(myresult_size.width == 640 && myresult_size.height >400 && myresult_size.height <430  ){ // defualt size
+                                    $("#results").append('<p class="myTile" ><a href="'+myresult_size.url+'" target="_blank"><img class="myImg" src="'+myresult_size.source+'"/></a></p>');
+                                }
+
+                            })
+                        })
+                    });
+                });
+            }
+        } ,
+
+
+            getInitialState: function() {
+                return {message: 'Please Enter Term'};
+            },
+            handleChange: function(event) {
+                this.setState({message: event.target.value});
+            },
+
+        render: function() {
+            var message = this.state.message;
+            return (
+                   <input value={message} onChange={this.handleChange}  id="input1"  onKeyPress={this.PresentPictures}> </input>
+            );
+        }
+    });
+
+    React.render(<MyFirstCompe />, document.getElementById('content'));
+
+</script>
+
+</body>
+</html>
